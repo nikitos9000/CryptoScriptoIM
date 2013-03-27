@@ -4,8 +4,7 @@ goog.require("goog.crypt");
 goog.require("goog.crypt.Aes");
 goog.require("goog.crypt.Cbc");
 goog.require("goog.crypt.base64");
-// goog.require("goog.crypt.Sha256");
-goog.require("goog.math");
+
 
 goog.scope(function() {
         var crypto = cryptoscripto.crypto;
@@ -15,39 +14,51 @@ goog.scope(function() {
         crypto.magic = "=CS=";
 
         crypto.encrypt = function(value) {
-                var engine = crypto.engine(crypto.key);
-                var result = engine.cipher.encrypt(goog.crypt.stringToByteArray(value), engine.vector);
+                var engine = new crypto.engine(crypto.key);
 
-                return crypto.magic + goog.crypt.base64.encodeByteArray(result);
+                return crypto.magic + engine.encrypt(value);
         };
 
         crypto.decrypt = function(value) {
-                var engine = crypto.engine(crypto.key);
+                var engine = new crypto.engine(crypto.key);
 
-                value = goog.crypt.base64.decodeStringToByteArray(value.substring(crypto.magic.length));
-
-                return goog.crypt.byteArrayToString(engine.cipher.decrypt(value, engine.vector));
+                return engine.decrypt(value.substring(crypto.magic.length));
         };
 
         crypto.isEncrypted = function(value) {
                 return utils.startsWith(value, crypto.magic);
         };
 
-        crypto.engine = function(password) {
-                // var sha256 = goog.crypt.Sha256();
-                // sha256.update(goog.crypt.stringToByteArray(password));
+        crypto.engine = function(key) {
+                var keyLength = 16;
+                var blockLength = 16;
+                var keyByteArray = goog.crypt.stringToUtf8ByteArray(key);
 
-                // var key = sha256.digest();
-                var key = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ];
+                var keyArray = [];
+                for (var i = 0; i < keyLength; ++i)
+                        keyArray.push(keyByteArray[i % keyByteArray.length]);
 
-                var vector = [ 11, 12, 13, 14, 15, 16, 17, 18, 19, 110, 111, 112, 113, 114, 115, 116 ];
-                // var vector = [];
-                // for (var i = 0; i < 16; ++i)
-                //         vector.push(goog.math.randomInt(256));
+                var vectorByteArray = [];
+                for (var i = 0; i < blockLength; ++i)
+                        vectorByteArray.push(i);
 
-                var provider = new goog.crypt.Aes(key);
-                var cipher = new goog.crypt.Cbc(provider);
+                var provider = new goog.crypt.Aes(keyArray);
+                var cipher = new goog.crypt.Cbc(provider, blockLength);
 
-                return { cipher: cipher, vector: vector };
+                this.encrypt = function(text) {
+                        var plainByteArray = goog.crypt.stringToUtf8ByteArray(text);
+
+                        for (var i = 0; i < plainByteArray.length % blockLength; ++i)
+                                plainByteArray.push(0);
+
+                        var cipherByteArray = cipher.encrypt(plainByteArray, vectorByteArray);
+                        return goog.crypt.base64.encodeByteArray(cipherByteArray);
+                };
+
+                this.decrypt = function(text) {
+                        var cipherByteArray = goog.crypt.base64.decodeStringToByteArray(text);
+                        var plainByteArray = cipher.decrypt(cipherByteArray, vectorByteArray);
+                        return goog.crypt.utf8ByteArrayToString(plainByteArray);
+                }
         };
 });
