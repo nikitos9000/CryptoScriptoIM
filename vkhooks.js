@@ -8,7 +8,8 @@ goog.scope(function() {
 
         vkhooks.onUpdateMessages = function(callback) {
                 //check for changes
-                setInterval(callback, 1000);
+                // setInterval(callback, 1000);
+                callback();
         };
 
         vkhooks.onUpdateSubmit = function(callback) {
@@ -18,32 +19,36 @@ goog.scope(function() {
         };
 
         vkhooks.updateMessages = function(handler) {
-                var messageElements = goog.dom.getElementsByClass("im_msg_text");
-                var userId = vkhooks._userId();
+                if (IM.panelUpdate.isWrapper) return;
 
-                for (var i = 0; i < messageElements.length; ++i) {
-                        if (vkhooks._isVisible(messageElements[i])) {
-                                var messageElement = messageElements[i];
-                                var messageText = goog.dom.getTextContent(messageElement);
-                                var newMessageText = handler(userId, messageText);
-                                if (newMessageText != messageText)
-                                        goog.dom.setTextContent(messageElement, newMessageText);
+                IM.panelUpdate = utils.wrap(IM.panelUpdate, function() {
+                        var messageElements = goog.dom.getElementsByClass("im_msg_text");
+                        var userId = vkhooks._userId();
+
+                        for (var i = 0; i < messageElements.length; ++i) {
+                                if (vkhooks._isVisible(messageElements[i])) {
+                                        var messageElement = messageElements[i];
+                                        var messageText = goog.dom.getTextContent(messageElement);
+                                        var newMessageText = handler(userId, messageText);
+                                        if (newMessageText != messageText)
+                                                goog.dom.setTextContent(messageElement, newMessageText);
+                                }
                         }
-                }
+                });
         };
 
         vkhooks.updateSubmit = function(handler) {
-                if (!IM.send.isWrapper) {
-                        IM.send = utils.wrap(IM.send, function() {
-                                var inputElement = vkhooks._inputElement();
-                                var userId = vkhooks._userId(inputElement);
+                if (IM.send.isWrapper) return;
 
-                                var inputText = goog.dom.getTextContent(inputElement);
-                                var newInputText = handler(userId, inputText);
-                                if (newInputText != inputText)
-                                        goog.dom.setTextContent(inputElement, newInputText);
-                        });
-                }
+                IM.send = utils.wrap(IM.send, function() {
+                        var inputElement = vkhooks._inputElement();
+                        var userId = vkhooks._userId(inputElement);
+
+                        var inputText = goog.dom.getTextContent(inputElement);
+                        var newInputText = handler(userId, inputText);
+                        if (newInputText != inputText)
+                                goog.dom.setTextContent(inputElement, newInputText);
+                });
 
                 var submitElement = goog.dom.getElement("im_send");
                 submitElement.onclick = IM.send;
