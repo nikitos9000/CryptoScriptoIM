@@ -2,45 +2,37 @@ goog.provide("cryptoscripto.vkhooks");
 goog.require("cryptoscripto.utils");
 goog.require('goog.dom');
 
+
 goog.scope(function() {
         var vkhooks = cryptoscripto.vkhooks;
         var utils = cryptoscripto.utils;
 
         vkhooks.onUpdateMessages = function(callback) {
-                //check for changes
-                // setInterval(callback, 1000);
-                callback();
+                window["IM"]["panelUpdate"] = utils.wrap(window["IM"]["panelUpdate"], callback, false);
+                window["IM"]["addMsg"] = utils.wrap(window["IM"]["addMsg"], callback, true);
         };
 
         vkhooks.onUpdateSubmit = function(callback) {
-                //check for changes
-                // callback();
-                setInterval(callback, 1000);
+                callback();
         };
 
         vkhooks.updateMessages = function(handler) {
-                if (IM.panelUpdate.isWrapper) return;
+                var messageElements = goog.dom.getElementsByClass("im_msg_text");
+                var userId = vkhooks._userId();
 
-                IM.panelUpdate = utils.wrap(IM.panelUpdate, function() {
-                        var messageElements = goog.dom.getElementsByClass("im_msg_text");
-                        var userId = vkhooks._userId();
-
-                        for (var i = 0; i < messageElements.length; ++i) {
-                                if (vkhooks._isVisible(messageElements[i])) {
-                                        var messageElement = messageElements[i];
-                                        var messageText = goog.dom.getTextContent(messageElement);
-                                        var newMessageText = handler(userId, messageText);
-                                        if (newMessageText != messageText)
-                                                goog.dom.setTextContent(messageElement, newMessageText);
-                                }
+                for (var i = 0; i < messageElements.length; ++i) {
+                        if (vkhooks._isVisible(messageElements[i])) {
+                                var messageElement = messageElements[i];
+                                var messageText = goog.dom.getTextContent(messageElement);
+                                var newMessageText = handler(userId, messageText);
+                                if (newMessageText != messageText)
+                                        goog.dom.setTextContent(messageElement, newMessageText);
                         }
-                });
+                }
         };
 
         vkhooks.updateSubmit = function(handler) {
-                if (IM.send.isWrapper) return;
-
-                IM.send = utils.wrap(IM.send, function() {
+                window["IM"]["send"] = utils.wrap(window["IM"]["send"], function() {
                         var inputElement = vkhooks._inputElement();
                         var userId = vkhooks._userId(inputElement);
 
@@ -48,10 +40,10 @@ goog.scope(function() {
                         var newInputText = handler(userId, inputText);
                         if (newInputText != inputText)
                                 goog.dom.setTextContent(inputElement, newInputText);
-                });
+                }, false);
 
                 var submitElement = goog.dom.getElement("im_send");
-                submitElement.onclick = IM.send;
+                submitElement.onclick = window["IM"]["send"];
         };
 
         vkhooks.updateStatus = function(status, data) {
