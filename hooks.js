@@ -5,7 +5,6 @@ goog.require("cryptoscripto.crypto");
 goog.require("cryptoscripto.keyexchange");
 goog.require("cryptoscripto.keystorage");
 
-
 goog.scope(function() {
         var hooks = cryptoscripto.hooks;
         var vkhooks = cryptoscripto.vkhooks;
@@ -20,7 +19,7 @@ goog.scope(function() {
         hooks.magicPlain = "$PLAIN$";
 
         hooks.install = function() {
-                keystorage.clear();
+                // keystorage.clear();
 
                 vkhooks.onUpdateMessages(hooks.onUpdateMessages);
                 vkhooks.onUpdateSubmit(hooks.onUpdateSubmit);
@@ -75,7 +74,6 @@ goog.scope(function() {
                 return prefix + hooks.magicPlain + text;
         };
 
-        //check for logic consistence
         hooks._secretToken = function(userId) {
                 var secretToken = keystorage.load(userId + "secretToken");
                 var externalToken = hooks._externalToken(userId);

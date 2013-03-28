@@ -2,7 +2,6 @@ goog.provide("cryptoscripto.vkhooks");
 goog.require("cryptoscripto.utils");
 goog.require('goog.dom');
 
-
 goog.scope(function() {
         var vkhooks = cryptoscripto.vkhooks;
         var utils = cryptoscripto.utils;

@@ -16,10 +16,10 @@ goog.scope(function() {
         };
 
         keystorage.clear = function(key) {
-                if (!key) {
-                        var mechanism = new goog.storage.mechanism.HTML5LocalStorage();
-                        return mechanism.clear();
-                }
+                // if (!key) {
+                //         var mechanism = new goog.storage.mechanism.HTML5LocalStorage();
+                //         return mechanism.clear();
+                // }
 
                 var storage = keystorage._storage();
                 return storage.remove(key);

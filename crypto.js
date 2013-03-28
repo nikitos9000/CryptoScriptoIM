@@ -6,7 +6,6 @@ goog.require("goog.crypt.Aes");
 goog.require("goog.crypt.Cbc");
 goog.require("goog.crypt.base64");
 
-
 goog.scope(function() {
         var crypto = cryptoscripto.crypto;
         var utils = cryptoscripto.utils;
