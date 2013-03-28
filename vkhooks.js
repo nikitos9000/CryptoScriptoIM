@@ -1,8 +1,10 @@
 goog.provide("cryptoscripto.vkhooks");
+goog.require("cryptoscripto.utils");
 goog.require('goog.dom');
 
 goog.scope(function() {
         var vkhooks = cryptoscripto.vkhooks;
+        var utils = cryptoscripto.utils;
 
         vkhooks.onUpdateMessages = function(callback) {
                 //check for changes
@@ -11,7 +13,8 @@ goog.scope(function() {
 
         vkhooks.onUpdateSubmit = function(callback) {
                 //check for changes
-                callback();
+                // callback();
+                setInterval(callback, 1000);
         };
 
         vkhooks.updateMessages = function(handler) {
@@ -30,37 +33,32 @@ goog.scope(function() {
         };
 
         vkhooks.updateSubmit = function(handler) {
-                var inputElement = vkhooks._inputElement(); //null;
-                var userId = vkhooks._userId(inputElement);
+                if (!IM.send.isWrapper) {
+                        IM.send = utils.wrap(IM.send, function() {
+                                var inputElement = vkhooks._inputElement();
+                                var userId = vkhooks._userId(inputElement);
 
-                // var inputElements = goog.dom.getElementsByClass("im_txt_wrap");
-                // for (var i = 0; i < inputElements.length; ++i)
-                //         if (vkhooks._isVisible(inputElements[i]))
-                //                 inputElement = goog.dom.getElementByClass("im_editable", inputElements[i]);
-
-                var inputHandler = function() {
-                        var inputText = goog.dom.getTextContent(inputElement);
-                        var newInputText = handler(userId, inputText);
-                        if (newInputText != inputText)
-                                goog.dom.setTextContent(inputElement, newInputText);
-                };
-
-                // Fix it
-                // var inputOnKeyPress = inputElement.onkeypress;
-
-                // inputElement.onkeypress = function(event) {
-                //         if (event.keyCode == 13)
-                //                 inputHandler();
-                //         return inputOnKeyPress && inputOnKeyPress.apply(this, arguments);
-                // };
+                                var inputText = goog.dom.getTextContent(inputElement);
+                                var newInputText = handler(userId, inputText);
+                                if (newInputText != inputText)
+                                        goog.dom.setTextContent(inputElement, newInputText);
+                        });
+                }
 
                 var submitElement = goog.dom.getElement("im_send");
-                var submitOnClick = submitElement.onclick;
+                submitElement.onclick = IM.send;
+        };
 
-                submitElement.onclick = function() {
-                        inputHandler();
-                        return submitOnClick.apply(this, arguments);
-                };
+        vkhooks.updateStatus = function(status, data) {
+                var submitElement = goog.dom.getElement("im_send");
+                var submitLabel = goog.dom.getTextContent(submitElement);
+                var prefix = data.sign + " ";
+
+                if (status && !utils.startsWith(submitLabel, prefix)) {
+                        goog.dom.setTextContent(submitElement, prefix + submitLabel);
+                } else if (!status && utils.startsWith(submitLabel, prefix)) {
+                        goog.dom.setTextContent(submitElement, submitLabel.substring(prefix.length));
+                }
         };
 
         vkhooks._isVisible = function(element) {
@@ -69,7 +67,7 @@ goog.scope(function() {
 
         vkhooks._userId = function(inputElement) {
                 inputElement = inputElement || vkhooks._inputElement();
-                return inputElement.substring("im_editable".length);
+                return inputElement.id.substring("im_editable".length);
         };
 
         vkhooks._inputElement = function() {

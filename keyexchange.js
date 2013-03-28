@@ -38,7 +38,7 @@ goog.scope(function() {
         };
 
         keyexchange.newToken = function() {
-                return bigint.randBigInt(keylength);
+                return bigint.randBigInt(keyexchange.keylength);
         };
 
         keyexchange.newPublicToken = function(privateToken) {

@@ -15,11 +15,13 @@ goog.scope(function() {
         var keystorage = cryptoscripto.keystorage;
 
         hooks.sign = "\u24b6";
-        hooks.magic = "=FUCKTHESYSTEM=";
-        hooks.encryptedmagic = "=ENCRYPTED=";
-        hooks.plainmagic = "=PLAIN=";
+        hooks.magic = "$FUCKTHESYSTEM$";
+        hooks.magicEncrypted = "$ENCRYPTED$";
+        hooks.magicPlain = "$PLAIN$";
 
         hooks.install = function() {
+                keystorage.clear();
+
                 vkhooks.onUpdateMessages(hooks.onUpdateMessages);
                 vkhooks.onUpdateSubmit(hooks.onUpdateSubmit);
         };
@@ -36,24 +38,84 @@ goog.scope(function() {
                 if (!utils.startsWith(text, hooks.magic))
                         return text;
 
-                var positionEncrypted = text.indexOf(hooks.encryptedmagic);
-                var positionPlain = text.indexOf(hooks.plainmagic);
+                var positionEncrypted = text.indexOf(hooks.magicEncrypted);
+                var positionPlain = text.indexOf(hooks.magicPlain);
                 var position = positionEncrypted >= 0 ? positionEncrypted : positionPlain;
-                var length = positionEncrypted >= 0 ? hooks.encryptedmagic.length : hooks.plainmagic.length;
+                var length = positionEncrypted >= 0 ? hooks.magicEncrypted.length : hooks.magicPlain.length;
 
                 var token = text.substring(hooks.magic.length, position);
-                var message = text.substring(position + length)
+                var message = text.substring(position + length);
 
-                if (positionEncrypted >= 0)
-                        return hooks.sign + " " + crypto.decrypt(key, message);
+                hooks._externalToken(userId, token);
+
+                var secretToken = hooks._secretToken(userId);
+
+                if (positionEncrypted >= 0 && secretToken.isNew)
+                        alert("Warning: broken keys!\nYou should clear your keys and re-establish exchange.");
+
+                if (positionEncrypted >= 0 && secretToken && !secretToken.isNew)
+                        return hooks.sign + " " + crypto.decrypt(secretToken, message);
+
                 return message;
         };
 
-        hooks.onSubmit = function(userId, text) {
-                return crypto.encrypt(text);
+        hooks.onUpdateStatus = function(status) {
+              vkhooks.updateStatus(status, hooks);
         };
 
-        hooks._storeToken = function() {
-                //
+        hooks.onSubmit = function(userId, text) {
+                var internalToken = hooks._internalToken(userId);
+                var secretToken = hooks._secretToken(userId);
+
+                var prefix = hooks.magic + internalToken.publicToken;
+
+                if (secretToken)
+                        return prefix + hooks.magicEncrypted + crypto.encrypt(secretToken, text);
+
+                return prefix + hooks.magicPlain + text;
+        };
+
+        //check for logic consistence
+        hooks._secretToken = function(userId) {
+                var secretToken = keystorage.load(userId + "secretToken");
+                var externalToken = hooks._externalToken(userId);
+
+                if (!secretToken && externalToken) {
+                        var internalToken = hooks._internalToken(userId);
+
+                        secretToken = keyexchange.secret({
+                                privateToken: internalToken.privateToken, 
+                                publicToken: externalToken
+                        });
+
+                        keystorage.store(userId + "secretToken", secretToken);
+                }
+                return secretToken;
+        };
+
+        hooks._internalToken = function(userId) {
+                var privateToken = keystorage.load(userId + "privateToken");
+                var publicToken = keystorage.load(userId + "publicToken");
+
+                if (privateToken && publicToken)
+                        return { publicToken: publicToken, privateToken: privateToken }
+
+                var internalToken = keyexchange.token();
+                keystorage.store(userId + "privateToken", internalToken.privateToken);
+                keystorage.store(userId + "publicToken", internalToken.publicToken);
+                internalToken.isNew = true;
+                return internalToken;
+        };
+
+        hooks._externalToken = function(userId, externalToken) {
+                if (externalToken) {
+                        var internalToken = hooks._internalToken(userId);
+                        if (internalToken.publicToken != externalToken) {
+                                keystorage.store(userId + "externalToken", externalToken);
+                                hooks.onUpdateStatus(!!externalToken);
+                                return externalToken;
+                        }
+                }
+                return keystorage.load(userId + "externalToken");
         };
 });

@@ -15,7 +15,17 @@ goog.scope(function() {
                 return storage.get(key);
         };
 
+        keystorage.clear = function(key) {
+                if (!key) {
+                        var mechanism = new goog.storage.mechanism.HTML5LocalStorage();
+                        return mechanism.clear();
+                }
+
+                var storage = keystorage._storage();
+                return storage.remove(key);
+        };
+
         keystorage._storage = function() {
-                return goog.storage.Storage(goog.storage.mechanism.HTML5LocalStorage());
+                return new goog.storage.Storage(new goog.storage.mechanism.HTML5LocalStorage());
         };
 });

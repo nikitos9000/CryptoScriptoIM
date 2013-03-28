@@ -12,10 +12,6 @@ goog.scope(function() {
         var utils = cryptoscripto.utils;
         var keyexchange = cryptoscripto.keyexchange;
 
-        // crypto.key = "P@ssw0rd";
-        // crypto.magic = "=FUCKTHESYSTEM=";
-        // crypto.keymagic = "=FIGHTDAPOWER=";
-
         crypto.encrypt = function(key, value) {
                 var engine = crypto.engine(key);
 
@@ -31,7 +27,6 @@ goog.scope(function() {
         crypto.engine = function(key) {
                 var keyLength = 16;
                 var blockLength = 16;
-                // var keyByteArray = goog.crypt.stringToUtf8ByteArray(key);
                 var keyByteArray = goog.crypt.base64.decodeStringToByteArray(key);
 
                 var keyArray = [];
