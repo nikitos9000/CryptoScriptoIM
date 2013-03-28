@@ -12,30 +12,27 @@ goog.scope(function() {
         var utils = cryptoscripto.utils;
         var keyexchange = cryptoscripto.keyexchange;
 
-        crypto.key = "P@ssw0rd";
-        crypto.magic = "=FUCKTHESYSTEM=";
-        crypto.keymagic = "=FIGHTDAPOWER=";
+        // crypto.key = "P@ssw0rd";
+        // crypto.magic = "=FUCKTHESYSTEM=";
+        // crypto.keymagic = "=FIGHTDAPOWER=";
 
-        crypto.encrypt = function(value) {
-                var engine = crypto.engine(crypto.key);
+        crypto.encrypt = function(key, value) {
+                var engine = crypto.engine(key);
 
-                return crypto.magic + engine.encrypt(value);
+                return engine.encrypt(value);
         };
 
-        crypto.decrypt = function(value) {
-                var engine = crypto.engine(crypto.key);
+        crypto.decrypt = function(key, value) {
+                var engine = crypto.engine(key);
 
-                return engine.decrypt(value.substring(crypto.magic.length));
-        };
-
-        crypto.isEncrypted = function(value) {
-                return utils.startsWith(value, crypto.magic);
+                return engine.decrypt(value);
         };
 
         crypto.engine = function(key) {
                 var keyLength = 16;
                 var blockLength = 16;
-                var keyByteArray = goog.crypt.stringToUtf8ByteArray(key);
+                // var keyByteArray = goog.crypt.stringToUtf8ByteArray(key);
+                var keyByteArray = goog.crypt.base64.decodeStringToByteArray(key);
 
                 var keyArray = [];
                 for (var i = 0; i < keyLength; ++i)
