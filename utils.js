@@ -10,7 +10,7 @@ goog.scope(function() {
         utils.wrap = function(func, wrapper, after) {
                 if (func.isWrapper) return func;
 
-                var new_func = function() {
+                var funcWrapper = function() {
                         if (!after)
                                 wrapper.apply(this, arguments);
                         var result = func.apply(this, arguments);
@@ -19,7 +19,7 @@ goog.scope(function() {
                         return result;
                 };
 
-                new_func.isWrapper = true;
-                return new_func;
+                funcWrapper.isWrapper = true;
+                return funcWrapper;
         };
 });
