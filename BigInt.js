@@ -1,4 +1,6 @@
 goog.provide("cryptoscripto.bigint");
+
+(function() {
 ////////////////////////////////////////////////////////////////////////////////////////
 // Big Integer Library v. 5.5
 // Created 2000, last modified 2013
@@ -181,41 +183,41 @@ goog.provide("cryptoscripto.bigint");
 ////////////////////////////////////////////////////////////////////////////////////////
 
 //globals
-bpe=0;         //bits stored per array element
-mask=0;        //AND this with an array element to chop it down to bpe bits
-radix=mask+1;  //equals 2^bpe.  A single 1 bit to the left of the last bit of mask.
+var bpe=0;         //bits stored per array element
+var mask=0;        //AND this with an array element to chop it down to bpe bits
+var radix=mask+1;  //equals 2^bpe.  A single 1 bit to the left of the last bit of mask.
 
 //the digits for converting to different bases
-digitsStr='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_=!@#$%^&*()[]{}|;:,.<>/?`~ \\\'\"+-';
+var digitsStr='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_=!@#$%^&*()[]{}|;:,.<>/?`~ \\\'\"+-';
 
 //initialize the global variables
-for (bpe=0; (1<<(bpe+1)) > (1<<bpe); bpe++);  //bpe=number of bits in the mantissa on this platform
+for (bpe=0; (1<<(bpe+1)) > (1<<bpe); bpe++) {};  //bpe=number of bits in the mantissa on this platform
 bpe>>=1;                   //bpe=number of bits in one element of the array representing the bigInt
 mask=(1<<bpe)-1;           //AND the mask with an integer to get its bpe least significant bits
 radix=mask+1;              //2^bpe.  a single 1 bit to the left of the first bit of mask
-one=int2bigInt(1,1,1);     //constant used in powMod_()
+var one=int2bigInt(1,1,1);     //constant used in powMod_()
 
 //the following global variables are scratchpad memory to 
 //reduce dynamic memory allocation in the inner loop
-t=new Array(0);
-ss=t;       //used in mult_()
-s0=t;       //used in multMod_(), squareMod_() 
-s1=t;       //used in powMod_(), multMod_(), squareMod_() 
-s2=t;       //used in powMod_(), multMod_()
-s3=t;       //used in powMod_()
-s4=t; s5=t; //used in mod_()
-s6=t;       //used in bigInt2str()
-s7=t;       //used in powMod_()
-T=t;        //used in GCD_()
-sa=t;       //used in mont_()
-mr_x1=t; mr_r=t; mr_a=t;                                      //used in millerRabin()
-eg_v=t; eg_u=t; eg_A=t; eg_B=t; eg_C=t; eg_D=t;               //used in eGCD_(), inverseMod_()
-md_q1=t; md_q2=t; md_q3=t; md_r=t; md_r1=t; md_r2=t; md_tt=t; //used in mod_()
+var t=new Array(0);
+var ss=t;       //used in mult_()
+var s0=t;       //used in multMod_(), squareMod_() 
+var s1=t;       //used in powMod_(), multMod_(), squareMod_() 
+var s2=t;       //used in powMod_(), multMod_()
+var s3=t;       //used in powMod_()
+var s4=t; var s5=t; //used in mod_()
+var s6=t;       //used in bigInt2str()
+var s7=t;       //used in powMod_()
+var T=t;        //used in GCD_()
+var sa=t;       //used in mont_()
+var mr_x1=t; var mr_r=t; var mr_a=t;                                      //used in millerRabin()
+var eg_v=t; var eg_u=t; var eg_A=t; var eg_B=t; var eg_C=t; var eg_D=t;               //used in eGCD_(), inverseMod_()
+var md_q1=t; var md_q2=t; var md_q3=t; var md_r=t; var md_r1=t; var md_r2=t; var md_tt=t; //used in mod_()
 
-primes=t; pows=t; s_i=t; s_i2=t; s_R=t; s_rm=t; s_q=t; s_n1=t; 
-  s_a=t; s_r2=t; s_n=t; s_b=t; s_d=t; s_x1=t; s_x2=t, s_aa=t; //used in randTruePrime_()
+var primes=t; var pows=t; var s_i=t; var s_i2=t; var s_R=t; var s_rm=t; var s_q=t; var s_n1=t; 
+  var s_a=t; var s_r2=t; var s_n=t; var s_b=t; var s_d=t; var s_x1=t; var s_x2=t, s_aa=t; //used in randTruePrime_()
   
-rpprb=t; //used in randProbPrimeRounds() (which also uses "primes")
+var rpprb=t; //used in randProbPrimeRounds() (which also uses "primes")
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -233,7 +235,7 @@ function findPrimes(n) {
       s[i]=1;
     p++;
     s[p]=s[p-1]+1;
-    for(; s[p]<n && s[s[p]]; s[p]++); //find next prime (where s[p]==0)
+    for(; s[p]<n && s[s[p]]; s[p]++) {}; //find next prime (where s[p]==0)
   }
   ans=new Array(p);
   for(i=0;i<p;i++)
@@ -308,8 +310,8 @@ function millerRabin(x,b) {
 //returns how many bits long the bigInt is, not counting leading zeros.
 function bitSize(x) {
   var j,z,w;
-  for (j=x.length-1; (x[j]==0) && (j>0); j--);
-  for (z=0,w=x[j]; w; (w>>=1),z++);
+  for (j=x.length-1; (x[j]==0) && (j>0); j--) {};
+  for (z=0,w=x[j]; w; (w>>=1),z++) {};
   z+=bpe*j;
   return z;
 }
@@ -548,8 +550,8 @@ function randTruePrime_(ans,k) {
 
     if (!divisible) {  //if it passes that test, continue checking s_n
       addInt_(s_n,-3);
-      for (j=s_n.length-1;(s_n[j]==0) && (j>0); j--);  //strip leading zeros
-      for (zz=0,w=s_n[j]; w; (w>>=1),zz++);
+      for (j=s_n.length-1;(s_n[j]==0) && (j>0); j--) {};  //strip leading zeros
+      for (zz=0,w=s_n[j]; w; (w>>=1),zz++) {};
       zz+=bpe*j;                             //zz=number of bits in s_n, ignoring leading zeros
       for (;;) {  //generate z-bit numbers until one falls in the range [0,s_n-1]
         randBigInt_(s_a,zz,0);
@@ -629,7 +631,7 @@ function GCD_(x,y) {
       }
     if (!sing) break; //quit when y all zero elements except possibly y[0]
 
-    for (i=x.length;!x[i] && i>=0;i--);  //find most significant element of x
+    for (i=x.length;!x[i] && i>=0;i--) {};  //find most significant element of x
     xp=x[i];
     yp=y[i];
     A=1; B=0; C=0; D=1;
@@ -884,7 +886,7 @@ function divide_(x,y,q,r) {
   var kx, ky;
   var i,j,y1,y2,c,a,b;
   copy_(r,x);
-  for (ky=y.length;y[ky-1]==0;ky--); //ky is number of elements in y, not including leading zeros
+  for (ky=y.length;y[ky-1]==0;ky--) {}; //ky is number of elements in y, not including leading zeros
 
   //normalize: ensure the most significant element of y has its highest bit set  
   b=y[ky-1];
@@ -895,7 +897,7 @@ function divide_(x,y,q,r) {
   leftShift_(r,a);
 
   //Rob Visser discovered a bug: the following line was originally just before the normalization.
-  for (kx=r.length;r[kx-1]==0 && kx>ky;kx--); //kx is number of elements in normalized x, not including leading zeros
+  for (kx=r.length;r[kx-1]==0 && kx>ky;kx--) {}; //kx is number of elements in normalized x, not including leading zeros
 
   copyInt_(q,0);                      // q=0
   while (!greaterShift(y,r,kx-ky)) {  // while (leftShift_(y,kx-ky) <= r) {
@@ -1019,7 +1021,7 @@ function str2bigInt(s,base,minSize) {
     addInt_(x,d);
   }
 
-  for (k=x.length;k>0 && !x[k-1];k--); //strip off leading zeros
+  for (k=x.length;k>0 && !x[k-1];k--) {}; //strip off leading zeros
   k=minSize>k+1 ? minSize : k+1;
   y=new Array(k);
   kk=k<x.length ? k : x.length;
@@ -1367,7 +1369,7 @@ function multMod_(x,y,n) {
 //do x=x*x mod n for bigInts x,n.
 function squareMod_(x,n) {
   var i,j,d,c,kx,kn,k;
-  for (kx=x.length; kx>0 && !x[kx-1]; kx--);  //ignore leading zeros in x
+  for (kx=x.length; kx>0 && !x[kx-1]; kx--) {};  //ignore leading zeros in x
   k=kx>n.length ? 2*kx : 2*n.length; //k=# elements in the product, which is twice the elements in the larger of x and n
   if (s0.length!=k) 
     s0=new Array(k);
@@ -1390,7 +1392,7 @@ function squareMod_(x,n) {
 //return x with exactly k leading zero elements
 function trim(x,k) {
   var i,y;
-  for (i=x.length; i>0 && !x[i-1]; i--);
+  for (i=x.length; i>0 && !x[i-1]; i--) {};
   y=new Array(i+k);
   copy_(y,x);
   return y;
@@ -1419,7 +1421,7 @@ function powMod_(x,y,n) {
 
   //calculate np from n for the Montgomery multiplications
   copyInt_(s7,0);
-  for (kn=n.length;kn>0 && !n[kn-1];kn--);
+  for (kn=n.length;kn>0 && !n[kn-1];kn--) {};
   np=radix-inverseModInt(modInt(n,radix),radix);
   s7[kn]=1;
   multMod_(x ,s7,n);   // x = x * 2**(kn*bp) mod n
@@ -1429,12 +1431,12 @@ function powMod_(x,y,n) {
   else
     copy_(s3,x);
 
-  for (k1=y.length-1;k1>0 & !y[k1]; k1--);  //k1=first nonzero element of y
+  for (k1=y.length-1;k1>0 & !y[k1]; k1--) {};  //k1=first nonzero element of y
   if (y[k1]==0) {  //anything to the 0th power is 1
     copyInt_(x,1);
     return;
   }
-  for (k2=1<<(bpe-1);k2 && !(y[k1] & k2); k2>>=1);  //k2=position of first 1 bit in y[k1]
+  for (k2=1<<(bpe-1);k2 && !(y[k1] & k2); k2>>=1) {};  //k2=position of first 1 bit in y[k1]
   for (;;) {
     if (!(k2>>=1)) {  //look at next bit of y
       k1--;
@@ -1472,8 +1474,8 @@ function mont_(x,y,n,np) {
     
   copyInt_(sa,0);
 
-  for (;kn>0 && n[kn-1]==0;kn--); //ignore leading zeros of n
-  for (;ky>0 && y[ky-1]==0;ky--); //ignore leading zeros of y
+  for (;kn>0 && n[kn-1]==0;kn--) {}; //ignore leading zeros of n
+  for (;ky>0 && y[ky-1]==0;ky--) {}; //ignore leading zeros of y
   ks=sa.length-1; //sa will never have more than this many nonzero elements.  
 
   //the following loop consumes 95% of the runtime for randTruePrime_() and powMod_() for large numbers
@@ -1506,7 +1508,8 @@ function mont_(x,y,n,np) {
   copy_(x,sa);
 }
 
-cryptoscripto.bigint.randBigInt = randBigInt;
-cryptoscripto.bigint.powMod = powMod;
-cryptoscripto.bigint.bigInt2str = bigInt2str;
-cryptoscripto.bigint.str2bigInt = str2bigInt;
+        cryptoscripto.bigint.randBigInt = randBigInt;
+        cryptoscripto.bigint.powMod = powMod;
+        cryptoscripto.bigint.bigInt2str = bigInt2str;
+        cryptoscripto.bigint.str2bigInt = str2bigInt;
+})();
