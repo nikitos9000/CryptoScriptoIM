@@ -9,6 +9,7 @@ goog.scope(function() {
         vkhooks.onUpdateMessages = function(callback) {
                 window["IM"]["panelUpdate"] = utils.wrap(window["IM"]["panelUpdate"], callback, false);
                 window["IM"]["addMsg"] = utils.wrap(window["IM"]["addMsg"], callback, true);
+                callback();
         };
 
         vkhooks.onUpdateSubmit = function(callback) {
@@ -17,7 +18,7 @@ goog.scope(function() {
 
         vkhooks.updateMessages = function(handler) {
                 var messageElements = goog.dom.getElementsByClass("im_msg_text");
-                var userId = vkhooks._userId();
+                var userId = vkhooks.userId();
 
                 for (var i = 0; i < messageElements.length; ++i) {
                         if (vkhooks._isVisible(messageElements[i])) {
@@ -33,7 +34,7 @@ goog.scope(function() {
         vkhooks.updateSubmit = function(handler) {
                 window["IM"]["send"] = utils.wrap(window["IM"]["send"], function() {
                         var inputElement = vkhooks._inputElement();
-                        var userId = vkhooks._userId(inputElement);
+                        var userId = vkhooks.userId(inputElement);
 
                         var inputText = goog.dom.getTextContent(inputElement);
                         var newInputText = handler(userId, inputText);
@@ -57,13 +58,13 @@ goog.scope(function() {
                 }
         };
 
-        vkhooks._isVisible = function(element) {
-                return element.style.display != "none";
-        };
-
-        vkhooks._userId = function(inputElement) {
+        vkhooks.userId = function(inputElement) {
                 inputElement = inputElement || vkhooks._inputElement();
                 return inputElement.id.substring("im_editable".length);
+        };
+
+        vkhooks._isVisible = function(element) {
+                return element.style.display != "none";
         };
 
         vkhooks._inputElement = function() {

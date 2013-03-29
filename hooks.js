@@ -19,8 +19,6 @@ goog.scope(function() {
         hooks.magicPlain = "$PLAIN$";
 
         hooks.install = function() {
-                // keystorage.clear();
-
                 vkhooks.onUpdateMessages(hooks.onUpdateMessages);
                 vkhooks.onUpdateSubmit(hooks.onUpdateSubmit);
         };
@@ -31,6 +29,9 @@ goog.scope(function() {
 
         hooks.onUpdateSubmit = function() {
                 vkhooks.updateSubmit(hooks.onSubmit);
+
+                var status = !!hooks._externalToken(vkhooks.userId());
+                hooks.onUpdateStatus(status);
         };
 
         hooks.onMessage = function(userId, text) {
@@ -49,8 +50,10 @@ goog.scope(function() {
 
                 var secretToken = hooks._secretToken(userId);
 
-                if (positionEncrypted >= 0 && secretToken.isNew)
+                if (positionEncrypted >= 0 && secretToken.isNew) {
                         alert("Warning: broken keys!\nYou should clear your keys and re-establish exchange.");
+                        hooks._clearTokens();
+                }
 
                 if (positionEncrypted >= 0 && secretToken && !secretToken.isNew)
                         return hooks.sign + " " + crypto.decrypt(secretToken, message);
@@ -101,6 +104,7 @@ goog.scope(function() {
                 var internalToken = keyexchange.token();
                 keystorage.store(userId + "privateToken", internalToken.privateToken);
                 keystorage.store(userId + "publicToken", internalToken.publicToken);
+                keystorage.clear(userId + "secretToken");
                 internalToken.isNew = true;
                 return internalToken;
         };
@@ -108,12 +112,25 @@ goog.scope(function() {
         hooks._externalToken = function(userId, externalToken) {
                 if (externalToken) {
                         var internalToken = hooks._internalToken(userId);
+
                         if (internalToken.publicToken != externalToken) {
+                                var currentExternalToken = keystorage.load(userId + "externalToken");
+
+                                if (currentExternalToken && currentExternalToken != externalToken)
+                                        keystorage.clear(userId + "secretToken");
+
                                 keystorage.store(userId + "externalToken", externalToken);
-                                hooks.onUpdateStatus(!!externalToken);
+                                hooks.onUpdateStatus(true);
                                 return externalToken;
                         }
                 }
                 return keystorage.load(userId + "externalToken");
+        };
+
+        hooks._clearTokens = function(userId) {
+                keystorage.clear(userId + "privateToken");
+                keystorage.clear(userId + "publicToken");
+                keystorage.clear(userId + "secretToken");
+                keystorage.clear(userId + "externalToken");
         };
 });

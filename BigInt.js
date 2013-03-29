@@ -1,6 +1,9 @@
 goog.provide("cryptoscripto.bigint");
 
 (function() {
+
+/* BEGIN LIBRARY */
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // Big Integer Library v. 5.5
 // Created 2000, last modified 2013
@@ -1507,6 +1510,8 @@ function mont_(x,y,n,np) {
     sub_(sa,n);
   copy_(x,sa);
 }
+
+/* END LIBRARY */
 
         cryptoscripto.bigint.randBigInt = randBigInt;
         cryptoscripto.bigint.powMod = powMod;
